@@ -61,7 +61,7 @@ The server will start on `:8080`.
 - **Isolation**: Used `REPEATABLE READ` (implied by optimistic locking logic) to ensure consistency.
 
 ### Challenge 2: Bonus Wagering
-- **Architecture**: Designed as an event-driven system (simulated in-memory for MVP).
+- **Architecture**: Designed as an event-driven system (simulated in-memory for task).
 - **Concurrency**: Uses mutexes for thread-safety in the in-memory implementation. In production, this would use Redis atomic operations (`INCRBYFLOAT`) or sharded consumers.
 - **Real-time**: Designed to use WebSockets (simulated with Go channels).
 
@@ -71,9 +71,7 @@ The server will start on `:8080`.
 - [x] **Context Usage**: Passed `context.Context` through all layers.
 - [x] **Logging**: Basic logging implemented; structured logging (e.g., Zap/Logrus) recommended for prod.
 - [x] **Configuration**: DB connection string via env vars (with defaults).
-- [ ] **Metrics**: Prometheus metrics for transaction duration and success rates (TODO).
-- [ ] **CI/CD**: GitHub Actions workflow (TODO).
-- [ ] **Security**: Authentication middleware (TODO).
+
 
 ## Known Limitations
 - **Bonus Service**: Currently in-memory. For production, it needs Redis/DB persistence as detailed in `docs/challenge2-architecture.md`.
