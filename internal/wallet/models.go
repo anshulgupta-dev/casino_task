@@ -7,28 +7,28 @@ import (
 )
 
 type Wallet struct {
-	WalletID   string          `db:"wallet_id"`
-	PlayerID   string          `db:"player_id"`
-	WalletType string          `db:"wallet_type"` // "main", "bonus"
-	Currency   string          `db:"currency"`
-	Balance    decimal.Decimal `db:"balance"`
-	Version    int             `db:"version"`
-	CreatedAt  time.Time       `db:"created_at"`
-	UpdatedAt  time.Time       `db:"updated_at"`
+	WalletID   string          `gorm:"column:wallet_id;primaryKey;type:uuid;default:uuid_generate_v4()"`
+	PlayerID   string          `gorm:"column:player_id;type:uuid;not null"`
+	WalletType string          `gorm:"column:wallet_type;type:varchar(20);not null"` // "main", "bonus"
+	Currency   string          `gorm:"column:currency;type:varchar(3);not null"`
+	Balance    decimal.Decimal `gorm:"column:balance;type:numeric(20,2);not null;default:0"`
+	Version    int             `gorm:"column:version;not null;default:1"`
+	CreatedAt  time.Time       `gorm:"column:created_at;not null;default:now()"`
+	UpdatedAt  time.Time       `gorm:"column:updated_at;not null;default:now()"`
 }
 
 type Transaction struct {
-	TransactionID   string          `db:"transaction_id"`
-	WalletID        string          `db:"wallet_id"`
-	PlayerID        string          `db:"player_id"`
-	TransactionType string          `db:"transaction_type"` // "deposit", "withdrawal", "bet", "win"
-	Amount          decimal.Decimal `db:"amount"`
-	BalanceBefore   decimal.Decimal `db:"balance_before"`
-	BalanceAfter    decimal.Decimal `db:"balance_after"`
-	ReferenceID     string          `db:"reference_id"` // external reference (game round, payment ID)
-	Status          string          `db:"status"`       // "pending", "completed", "failed"
-	CreatedAt       time.Time       `db:"created_at"`
-	CompletedAt     *time.Time      `db:"completed_at"`
+	TransactionID   string          `gorm:"column:transaction_id;primaryKey;type:uuid;default:uuid_generate_v4()"`
+	WalletID        string          `gorm:"column:wallet_id;type:uuid;not null"`
+	PlayerID        string          `gorm:"column:player_id;type:uuid;not null"`
+	TransactionType string          `gorm:"column:transaction_type;type:varchar(20);not null"` // "deposit", "withdrawal", "bet", "win"
+	Amount          decimal.Decimal `gorm:"column:amount;type:numeric(20,2);not null"`
+	BalanceBefore   decimal.Decimal `gorm:"column:balance_before;type:numeric(20,2);not null"`
+	BalanceAfter    decimal.Decimal `gorm:"column:balance_after;type:numeric(20,2);not null"`
+	ReferenceID     string          `gorm:"column:reference_id;type:varchar(255);not null"` // external reference (game round, payment ID)
+	Status          string          `gorm:"column:status;type:varchar(20);not null"`        // "pending", "completed", "failed"
+	CreatedAt       time.Time       `gorm:"column:created_at;not null;default:now()"`
+	CompletedAt     *time.Time      `gorm:"column:completed_at"`
 }
 
 type TransactionRequest struct {

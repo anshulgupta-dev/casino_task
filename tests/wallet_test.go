@@ -33,7 +33,7 @@ func init() {
 	}
 	err = db.AutoMigrate(&wallet.Wallet{}, &wallet.Transaction{})
 	if err != nil {
-		fmt.Println("Failed to migrate database")
+		fmt.Printf("Failed to migrate database: %v\n", err)
 		return
 	}
 }
@@ -50,12 +50,13 @@ func setUpWallet(t *testing.T, balance decimal.Decimal) *wallet.Wallet {
 	if balance.GreaterThan(decimal.Zero) {
 		transaction := &wallet.Transaction{
 			WalletID:        w.WalletID,
+			PlayerID:        w.PlayerID,
 			Amount:          balance,
 			TransactionType: "credit",
 			ReferenceID:     uuid.NewString(),
 		}
 		err = repo.Credit(context.Background(), transaction)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		w.Balance = balance
 	}
 
@@ -104,7 +105,7 @@ func TestConcurrentDebits(t *testing.T) {
 
 	finalWallet, err := service.GetBalance(context.Background(), w.PlayerID, "main", "USD")
 	require.NoError(t, err)
-	require.Equal(t, decimal.NewFromInt(0), finalWallet.Balance, "finalBalance")
+	require.True(t, decimal.NewFromInt(0).Equal(finalWallet.Balance), "finalBalance: expected 0, got %s", finalWallet.Balance)
 
 }
 
@@ -134,7 +135,7 @@ func TestIdempotentTransaction(t *testing.T) {
 
 	finalWallet, err := service.GetBalance(context.Background(), w.PlayerID, "main", "USD")
 	require.NoError(t, err)
-	require.Equal(t, decimal.NewFromInt(40), finalWallet.Balance, "finalBalance")
+	require.True(t, decimal.NewFromInt(40).Equal(finalWallet.Balance), "finalBalance: expected 40, got %s", finalWallet.Balance)
 
 }
 
@@ -192,6 +193,6 @@ func TestRaceCondition(t *testing.T) {
 	finalWallet, err := service.GetBalance(context.Background(), w.PlayerID, "main", "USD")
 	require.NoError(t, err)
 	exactBalance := decimal.NewFromInt(50).Add(decimal.NewFromInt(int64(succCredits - successDebits)))
-	require.Equal(t, exactBalance, finalWallet.Balance, "finalBalance")
+	require.True(t, exactBalance.Equal(finalWallet.Balance), "finalBalance: expected %s, got %s", exactBalance, finalWallet.Balance)
 
 }
